@@ -6,7 +6,7 @@ export async function testXSS(url) {
   try {
     const res = await axios.get(testUrl);
     if (res.data.includes(payload)) {
-      return { vuln: "XSS", details: "Payload riflesso nella risposta" };
+      return { vuln: "XSS", details: "Unfiltered payload" };
     }
     return null;
   } catch {
