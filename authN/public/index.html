@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<body>
+<h2>WebAuthN</h2>
+<input id="email" placeholder="email@example.com" />
+<button id="register">Register</button>
+<button id="login">Login</button>
+<pre id="out"></pre>
+<script>
+const out = t => document.getElementById('out').textContent += t + '\n';
+// from binary to base64
+function buf2b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+// from base64 to binary
+function b642buf(b){ const str=atob(b.replace(/-/g,'+').replace(/_/g,'/')); const u=new Uint8Array(str.length); for(let i=0;i<str.length;i++) u[i]=str.charCodeAt(i); return u.buffer; }
+
+document.getElementById('register').onclick = async ()=>{
+  const email = document.getElementById('email').value;
+  if(!email){ out('Enter email'); return; }
+  try{
+    const opts = {
+      publicKey:{
+        challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))), // random nonce from browser to authenticator, then server will 
+        rp:{name:'Minimal'},
+        user:{id:Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(16))),name:email,displayName:email}, // to identify user credentias
+        pubKeyCredParams:[{type:'public-key',alg:-7}], // -7 = algo es256
+        timeout:60000,
+        attestation:'none'
+      }
+    };
+    const cred = await navigator.credentials.create(opts); // registration pop-up from browser/authenticator
+    const payload = {
+      email,
+      id: cred.id,
+      rawId: buf2b64(cred.rawId), // to base64 to send to the server 
+      type: cred.type
+    };
+    await fetch('/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); // registration sent to the server
+    window.registeredCredential = payload;
+    out('Registered: ' + email + ' (' + cred.id + ')');
+  } catch(e){ out('Error: '+e); }
+};
+
+document.getElementById('login').onclick = async ()=>{
+  const email = document.getElementById('email').value;
+  if(!email){ out('Enter email'); return; }
+  if(!window.registeredCredential || window.registeredCredential.email !== email){
+    out('No credential registered');
+    return;
+  }
+  try{
+    const opts = {
+      publicKey:{
+        challenge: Uint8Array.from(window.crypto.getRandomValues(new Uint8Array(32))),
+        allowCredentials: [{id:b642buf(window.registeredCredential.rawId),type:'public-key'}], // pass rawId in binary so authenticator knows which credentials to use
+        timeout:60000,
+        userVerification:'preferred'
+      }
+    };
+    const assertion = await navigator.credentials.get(opts);
+    out('Login success: ' + assertion.id + ' (' + email + ')');
+  } catch(e){ out('Error: '+e); }
+};
+</script>
+</body>
+</html>
