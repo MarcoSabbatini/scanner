@@ -32,6 +32,56 @@ This module provides an implementation of WebAuthN-based authentication. It allo
 
 > **Note:** Since the SSL certificate is self-signed, the browser may display a security warning. Just bypass it
 
+## Testing WebAuthn without Hardware (Virtual Authenticator)
+
+You can test WebAuthn without a fingerprint reader or USB security key using the **Virtual Authenticator** built into browsers.
+
+### Supported Browsers
+
+| Browser | WebAuthn Virtual Authenticator |
+|--------|:------------------------------:|
+| Chrome/Chromium | Recommended |
+| Brave | Yes |
+| Microsoft Edge | Yes |
+| Firefox | No built-in support |
+| Safari | No |
+
+---
+
+### Steps (First Time Browser Setup)
+
+Open DevTools  
+- Windows/Linux: `Ctrl + Shift + I`  
+- macOS: `Cmd + Option + I`
+
+Go to: **More Tools** then **WebAuthn** then **Enable virtual authenticator environment**
+
+
+Add a new authenticator:
+
+| Setting | Value |
+|--------|-------|
+| Protocol | `ctap2` |
+| Transport | `internal` |
+| Resident Key | Enabled |
+| PIN | Optional |
+
+You are now ready to register a credential.
+
+
+### Reusing on next launches
+
+If the browser is closed and reopened:
+
+Go to: **More Tools** then **WebAuthn** then **Enable virtual authenticator environment** again, there will be no need to create a new authenticator, the previously created one is still there.
+
+## Usage
+
+1. Open https://localhost:3000
+2. Enter an email in the field
+3. Click **Register** → The WebAuthn popup should appear
+4. Then click **Login** → Authentication should succeed
+
 ## API Endpoints
 
 ### `GET /`
