@@ -84,6 +84,18 @@ Go to: **More Tools** then **WebAuthn** then **Enable virtual authenticator envi
 
 ## API Endpoints
 
+### `POST /webauthn/generate-registration-options`
+Generates WebAuthN registration options for a user. The server saves the challenge in memory and returns the options to the client. This is used to initiate the WebAuthN registration process.
+
+- **Request Body:**
+  ```json
+  {
+    "email": "user@example.com"
+  }
+  ```
+
+- **Response:** Returns the registration options, including the challenge and user information.
+
 ### `GET /`
 Serves the main HTML page for the WebAuthN user interface.
 
