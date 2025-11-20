@@ -1,15 +1,16 @@
-const fs = require('fs');
-const express = require('express');
-const https = require('https');
-const path = require('path');
+import https from "https"
+import express from "express"
+import webAuthnRoutes from "./routes/webauthn.js";
+import fs from "fs"
+import bodyParser from "body-parser";
 
 const app = express();
-app.use(express.json()); 
 
-const webAuthnRoutes = require('./routes/webauthn');
-app.use('/', webAuthnRoutes);
+app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/webauthn', webAuthnRoutes);
+
+app.use(express.static('public'));
 
 const key = fs.readFileSync('./localhost-key.pem');
 const cert = fs.readFileSync('./localhost.pem');
